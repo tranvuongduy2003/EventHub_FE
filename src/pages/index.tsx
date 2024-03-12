@@ -1,118 +1,240 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
+//next
+import Image from 'next/image';
+import Link from 'next/link';
 
-const inter = Inter({ subsets: ["latin"] });
+//component
+import {
+  CategoryCard,
+  EventCard,
+  EventSearchBar,
+  HighlightEventCard
+} from '@/components/event';
+import { MainLayout } from '@/components/layout';
+import { Button, Skeleton } from '@/components/ui';
 
-export default function Home() {
+//model
+import { HighlightType, NextPageWithLayout } from '@/models';
+
+//hook
+import {
+  useCategories,
+  useHighlightEvent,
+  useNewestEvents,
+  useRandomEvents,
+  useUpcomingEvents
+} from '@/hooks';
+
+const Home: NextPageWithLayout = () => {
+  const { events: newestEvents, isLoading: newestEventsLoading } =
+    useNewestEvents();
+  const { events: upcomingEvents, isLoading: upcomingEventsLoading } =
+    useUpcomingEvents();
+  const { event: highlightEvent, isLoading: highlightEventLoading } =
+    useHighlightEvent();
+  const { events: randomEvents, isLoading: randomEventsLoading } =
+    useRandomEvents();
+  const { categories, isLoading: categoryLoading } = useCategories();
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
+    <>
+      {/* HEADER */}
+      <section className="px-[200px] py-36 w-full relative flex items-center justify-center">
+        <div className="absolute top-0 left-0 w-full h-full z-10 bg-primary-00 opacity-20"></div>
         <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+          src="/images/main-poster.png"
+          alt="main-poster"
+          fill
+          style={{ objectFit: 'cover' }}
         />
-      </div>
+        <h1 className="text-white text-[68px] font-bold leading-[88px] mx-auto text-center z-20 ">
+          Lập <span className="text-primary">những kế hoạch</span> tuyệt vời
+          nhất cho chính mình
+        </h1>
+        {/* SEARCH */}
+        <div className="absolute bottom-0 z-30 px-[293px] w-full translate-y-1/2 cursor-pointer">
+          <Link href={'/event/search'}>
+            <EventSearchBar />
+          </Link>
+        </div>
+      </section>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
+      {/* NEWEST EVENTS */}
+      <section className="mt-28 mx-[132px] mb-[100px]">
+        <div className="flex items-center justify-between mb-[52px]">
+          <h2 className="text-[32px] font-bold leading-[48px]">
+            Sự kiện <span className="text-primary-600">mới nhất</span>
+          </h2>
+          <Link href={'/event/search'}>
+            <Button
+              type="button"
+              className="bg-primary-100 text-primary-600 hover:bg-primary-200"
+            >
+              Xem thêm
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-3 gap-8">
+          {newestEventsLoading ? (
+            <>
+              <Skeleton className="h-[349px]" />
+              <Skeleton className="h-[349px]" />
+              <Skeleton className="h-[349px]" />
+            </>
+          ) : (
+            newestEvents &&
+            newestEvents.length > 0 &&
+            newestEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* CATEGORIES */}
+      <section className="my-[100px] mx-[132px]">
+        <h2 className="mb-[34px] text-[32px] font-bold leading-[48px]">
+          Khám phá theo <span className="text-primary-600">thể loại</span>
+        </h2>
+
+        <div className="flex justify-center gap-7">
+          {categoryLoading ? (
+            <>
+              <Skeleton className="w-[211px] h-[154px]" />
+              <Skeleton className="w-[211px] h-[154px]" />
+              <Skeleton className="w-[211px] h-[154px]" />
+              <Skeleton className="w-[211px] h-[154px]" />
+              <Skeleton className="w-[211px] h-[154px]" />
+            </>
+          ) : (
+            categories &&
+            categories.length > 0 &&
+            categories.map(category => (
+              <CategoryCard key={category.id} category={category} />
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* UPCOMING EVENTS */}
+      <section className="py-14 px-[132px] bg-neutral-100">
+        <div className="flex items-center justify-between mb-[52px]">
+          <h2 className="text-[32px] font-bold leading-[48px]">
+            Sắp diễn ra <span className="text-primary-500">trong 24h</span>
+          </h2>
+          <Link href={'/event/search'}>
+            <Button
+              type="button"
+              className="bg-primary-100 text-primary-500 hover:bg-primary-200"
+            >
+              Xem thêm
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          {upcomingEventsLoading ? (
+            <>
+              <Skeleton className="h-[349px]" />
+              <Skeleton className="h-[349px]" />
+            </>
+          ) : (
+            upcomingEvents &&
+            upcomingEvents.length > 0 &&
+            upcomingEvents.map(event => (
+              <EventCard key={event.id} event={event} size="large" />
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* HIGHLIGHT EVENTS */}
+      <section className="my-[100px] mx-[132px]">
+        <div className="flex items-center justify-between mb-[52px]">
+          <h2 className="text-[32px] font-bold leading-[48px]">
+            Điểm nhấn{' '}
+            <span className="text-primary-500">
+              trong{' '}
+              {highlightEvent?.highlightType === HighlightType.WEEK
+                ? 'tuần'
+                : highlightEvent?.highlightType === HighlightType.MONTH
+                  ? 'tháng'
+                  : highlightEvent?.highlightType === HighlightType.YEAR
+                    ? 'năm'
+                    : 'tuần'}
             </span>
           </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+          <Link href={'/event/search'}>
+            <Button
+              type="button"
+              className="bg-primary-100 text-primary-500 hover:bg-primary-200"
+            >
+              Xem thêm
+            </Button>
+          </Link>
+        </div>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+        {highlightEventLoading ? (
+          <>
+            <Skeleton className="h-[349px]" />
+          </>
+        ) : (
+          <div className="w-full p-[60px] bg-slate-600 grid grid-cols-2 gap-[60px] relative rounded-m overflow-hidden">
+            {highlightEvent && highlightEvent.event && (
+              <>
+                {highlightEvent.event.coverImage && (
+                  <Image
+                    src={highlightEvent.event.coverImage}
+                    alt="highlight-event-image"
+                    className="absolute top-0 left-0 w-full h-full object-cover z-0"
+                    fill
+                  />
+                )}
+                <div className="z-10">
+                  <HighlightEventCard event={highlightEvent.event} />
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </section>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
+      {/* MORE EVENTS */}
+      <section className="my-[100px] mx-[132px]">
+        <div className="flex items-center justify-between mb-[52px]">
+          <h2 className="text-[32px] font-bold leading-[48px]">
+            Nhiều sự kiện hơn
           </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
+          <Link href={'/event/search'}>
+            <Button
+              type="button"
+              className="bg-primary-100 text-primary-500 hover:bg-primary-200"
+            >
+              Xem thêm
+            </Button>
+          </Link>
+        </div>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+        <div className="grid grid-cols-3 gap-8">
+          {randomEventsLoading ? (
+            <>
+              <Skeleton className="h-[349px]" />
+              <Skeleton className="h-[349px]" />
+              <Skeleton className="h-[349px]" />
+            </>
+          ) : (
+            randomEvents &&
+            randomEvents.length > 0 &&
+            randomEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))
+          )}
+        </div>
+      </section>
+    </>
   );
-}
+};
+
+Home.Layout = MainLayout;
+
+export default Home;
